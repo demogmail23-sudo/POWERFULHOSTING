@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Management - ZAINU HOST PRO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--text);
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .server-title {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .action-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .start-btn { background: var(--success); color: white; }
+        .stop-btn { background: var(--danger); color: white; }
+        .restart-btn { background: var(--warning); color: black; }
+        .back-btn { background: rgba(99, 102, 241, 0.2); color: white; }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        .tab.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .console-box {
+            background: #000000;
+            border-radius: 16px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            height: 500px;
+            overflow-y: auto;
+            color: #00ff88;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .file-table {
+            width: 100%;
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .file-table th, .file-table td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .file-name {
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--primary);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            height: 400px;
+            background: var(--darker);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            color: white;
+            padding: 1rem;
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .server-title { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🚀 ZAINU HOST <span style="font-size:0.8rem">PRO</span></div>
+        <button onclick="goBack()" class="back-btn" style="padding:0.5rem 1rem; border-radius:8px">← Back to Dashboard</button>
+    </nav>
+
+    <div class="container">
+        <div class="server-header">
+            <h1 class="server-title" id="serverName">Loading...</h1>
+            <div class="action-buttons">
+                <button class="action-btn start-btn" onclick="serverAction('start')">▶ START</button>
+                <button class="action-btn restart-btn" onclick="serverAction('restart')">🔄 RESTART</button>
+                <button class="action-btn stop-btn" onclick="serverAction('stop')">⏹ STOP</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('console')">📟 Console</button>
+            <button class="tab" onclick="switchTab('files')">📁 Files</button>
+            <button class="tab" onclick="switchTab('stats')">📊 Stats</button>
+        </div>
+
+        <!-- Console Tab -->
+        <div id="consoleTab">
+            <div class="console-box" id="consoleLog">🟢 Connecting to server...</div>
+        </div>
+
+        <!-- Files Tab -->
+        <div id="filesTab" style="display:none">
+            <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+                📂 Click or Drag & Drop to Upload Files
+                <input type="file" id="fileInput" multiple style="display:none">
+            </div>
+            <table class="file-table">
+                <thead><tr><th>Name</th><th>Size</th><th>Modified</th><th>Actions</th></tr></thead>
+                <tbody id="filesList"></tbody>
+            </table>
+        </div>
+
+        <!-- Stats Tab -->
+        <div id="statsTab" style="display:none">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem">
+                <div class="stat-card" style="background:var(--card); padding:1rem; border-radius:16px"><div>⚡ CPU</div><div id="cpuUsage" style="font-size:2rem">0%</div></div>
+                <div class="stat-card" style="background:var(--card); padding:1rem; border-radius:16px"><div>🧠 Memory</div><div id="memoryUsage" style="font-size:2rem">0 MB</div></div>
+                <div class="stat-card" style="background:var(--card); padding:1rem; border-radius:16px"><div>📁 Files</div><div id="filesCount" style="font-size:2rem">0</div></div>
+                <div class="stat-card" style="background:var(--card); padding:1rem; border-radius:16px"><div>🟢 Status</div><div id="serverStatus" style="font-size:2rem">Offline</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Editor Modal -->
+    <div id="editorModal" class="modal">
+        <div class="modal-content">
+            <h3 id="editorTitle">Edit File</h3>
+            <textarea id="editorContent"></textarea>
+            <div style="display:flex; gap:1rem; margin-top:1rem">
+                <button onclick="saveFile()" style="background:var(--success); border:none; padding:0.5rem 1rem; border-radius:8px; color:white">💾 Save</button>
+                <button onclick="closeEditor()" style="background:var(--danger); border:none; padding:0.5rem 1rem; border-radius:8px; color:white">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const folder = window.location.pathname.split('/').pop();
+        let statsInterval = null;
+        let currentFile = null;
+
+        async function init() {
+            await checkAuth();
+            document.getElementById('serverName').textContent = folder;
+            startPolling();
+            loadFiles();
+        }
+
+        async function checkAuth() {
+            const res = await fetch('/api/current_user');
+            const data = await res.json();
+            if (!data.success) window.location.href = '/login';
+        }
+
+        function startPolling() {
+            if (statsInterval) clearInterval(statsInterval);
+            statsInterval = setInterval(async () => {
+                const res = await fetch(`/api/server/stats/${folder}`);
+                const data = await res.json();
+                document.getElementById('consoleLog').innerHTML = data.logs || '📟 No logs yet...';
+                document.getElementById('cpuUsage').textContent = data.cpu + '%';
+                document.getElementById('memoryUsage').textContent = data.memory + ' MB';
+                document.getElementById('filesCount').textContent = data.files_count;
+                document.getElementById('serverStatus').textContent = data.running ? '🟢 Running' : '🔴 Offline';
+                const consoleDiv = document.getElementById('consoleLog');
+                consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            }, 2000);
+        }
+
+        async function serverAction(action) {
+            const res = await fetch(`/api/server/${action}/${folder}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success && action === 'start') startPolling();
+        }
+
+        async function loadFiles() {
+            const res = await fetch(`/api/files/list/${folder}`);
+            const data = await res.json();
+            const tbody = document.getElementById('filesList');
+            
+            if (!data.files || data.files.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No files</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.files.map(f => `
+                <tr>
+                    <td class="file-name" onclick="openFile('${f.name}')">${f.is_dir ? '📁' : '📄'} ${f.name}</td>
+                    <td>${f.size_kb} KB</td>
+                    <td>${new Date(f.modified).toLocaleString()}</td>
+                    <td><button onclick="deleteFile('${f.name}')" style="background:transparent; border:1px solid var(--danger); color:var(--danger); padding:0.2rem 0.5rem; border-radius:4px">Delete</button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function openFile(filename) {
+            currentFile = filename;
+            const res = await fetch(`/api/files/content/${folder}/${filename}`);
+            const data = await res.json();
+            document.getElementById('editorTitle').textContent = `Editing: ${filename}`;
+            document.getElementById('editorContent').value = data.content || '';
+            document.getElementById('editorModal').style.display = 'flex';
+        }
+
+        async function saveFile() {
+            const content = document.getElementById('editorContent').value;
+            await fetch(`/api/files/save/${folder}/${currentFile}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            });
+            closeEditor();
+            loadFiles();
+        }
+
+        async function deleteFile(filename) {
+            if (confirm(`Delete ${filename}?`)) {
+                await fetch(`/api/files/delete/${folder}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: filename })
+                });
+                loadFiles();
+            }
+        }
+
+        document.getElementById('fileInput').onchange = async (e) => {
+            const formData = new FormData();
+            for (let f of e.target.files) formData.append('files[]', f);
+            await fetch(`/api/files/upload/${folder}`, { method: 'POST', body: formData });
+            loadFiles();
+        };
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('consoleTab').style.display = tab === 'console' ? 'block' : 'none';
+            document.getElementById('filesTab').style.display = tab === 'files' ? 'block' : 'none';
+            document.getElementById('statsTab').style.display = tab === 'stats' ? 'block' : 'none';
+        }
+
+        function closeEditor() {
+            document.getElementById('editorModal').style.display = 'none';
+        }
+
+        function goBack() {
+            window.location.href = '/';
+        }
+
+        init();
+    </script>
+</body>
+</html>

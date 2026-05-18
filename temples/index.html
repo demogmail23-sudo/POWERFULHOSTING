@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ZAINU HOST PRO - Ultimate Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo span {
+            font-size: 0.8rem;
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .storage-badge {
+            background: rgba(16, 185, 129, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            border: 1px solid var(--success);
+            font-size: 0.85rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            padding-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.7rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        /* Server Cards */
+        .servers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .server-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .server-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .server-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .server-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .status-running {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .status-stopped {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .server-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid var(--primary);
+        }
+
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.8rem 0;
+            background: var(--dark);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+            .navbar { padding: 1rem; }
+            .stat-value { font-size: 1.8rem; }
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--card);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🚀 ZAINU HOST <span>PRO</span></div>
+        <div class="user-info">
+            <div class="storage-badge" id="storageBadge">📦 Loading...</div>
+            <div class="avatar" id="userAvatar">👤</div>
+            <span id="username">Loading...</span>
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            <button class="btn-primary" onclick="showCreateServerModal()">➕ New Server</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalServers">0</div>
+                <div class="stat-label">🖥️ Total Servers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="runningServers">0</div>
+                <div class="stat-label">⚡ Running Servers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="storageUsed">0 MB</div>
+                <div class="stat-label">💾 Storage Used</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="apiKeysCount">0</div>
+                <div class="stat-label">🔑 API Keys</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="subdomainsCount">0</div>
+                <div class="stat-label">🌐 Subdomains</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="referralCode">-</div>
+                <div class="stat-label">🎁 Referral Code</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('servers')">🖥️ My Servers</button>
+            <button class="tab" onclick="switchTab('subdomains')">🌐 Subdomains</button>
+            <button class="tab" onclick="switchTab('apikeys')">🔑 API Keys</button>
+            <button class="tab" onclick="switchTab('activity')">📋 Activity</button>
+            <button class="tab" onclick="switchTab('referrals')">🎁 Referrals</button>
+            <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- Servers Tab -->
+        <div id="serversTab">
+            <div class="servers-grid" id="serversList"></div>
+        </div>
+
+        <!-- Subdomains Tab -->
+        <div id="subdomainsTab" style="display:none">
+            <div class="stat-card" style="margin-bottom:1.5rem">
+                <h3>🎁 Create Free Subdomain</h3>
+                <div style="display:flex; gap:0.8rem; margin-top:1rem; flex-wrap:wrap">
+                    <input type="text" id="newSubdomain" placeholder="yourname" style="flex:1">
+                    <select id="subdomainServer" style="width:auto"></select>
+                    <button class="btn-primary" onclick="createSubdomain()">✨ Create</button>
+                </div>
+            </div>
+            <div class="servers-grid" id="subdomainsList"></div>
+        </div>
+
+        <!-- API Keys Tab -->
+        <div id="apikeysTab" style="display:none">
+            <div class="stat-card" style="margin-bottom:1.5rem">
+                <h3>🔐 Generate API Key</h3>
+                <div style="display:flex; gap:0.8rem; margin-top:1rem">
+                    <input type="text" id="apiKeyName" placeholder="Key Name">
+                    <button class="btn-primary" onclick="generateApiKey()">Generate</button>
+                </div>
+            </div>
+            <div class="servers-grid" id="apiKeysList"></div>
+        </div>
+
+        <!-- Activity Tab -->
+        <div id="activityTab" style="display:none">
+            <div class="servers-grid" id="activityList"></div>
+        </div>
+
+        <!-- Referrals Tab -->
+        <div id="referralsTab" style="display:none">
+            <div class="stat-card">
+                <h3>🎁 Referral Program</h3>
+                <p style="margin:1rem 0">Invite friends and get <strong style="color:var(--success)">100MB bonus</strong> per referral!</p>
+                <div style="background:var(--dark); padding:1rem; border-radius:12px; text-align:center">
+                    <code id="referralLink" style="font-size:1.2rem">Loading...</code>
+                    <button class="btn-primary" onclick="copyReferralLink()" style="margin-left:1rem">📋 Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settingsTab" style="display:none">
+            <div class="stat-card">
+                <h3>⚙️ Account Settings</h3>
+                <div style="margin:1rem 0">
+                    <label>📧 Email</label>
+                    <input type="email" id="userEmail" placeholder="your@email.com" style="width:100%">
+                </div>
+                <div style="margin:1rem 0">
+                    <label>🔒 New Password</label>
+                    <input type="password" id="newPassword" placeholder="Min 6 characters" style="width:100%">
+                </div>
+                <div style="margin:1rem 0">
+                    <label>✓ Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm password" style="width:100%">
+                </div>
+                <button class="btn-primary" onclick="updateSettings()">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Server Modal -->
+    <div id="createModal" class="modal">
+        <div class="modal-content">
+            <h3>✨ Create New Server</h3>
+            <input type="text" id="serverName" placeholder="Server Name">
+            <select id="serverTemplate">
+                <option value="blank">📄 Blank Project</option>
+                <option value="python">🐍 Python Application</option>
+                <option value="node">💚 Node.js Application</option>
+                <option value="html">🌐 Static Website</option>
+                <option value="react">⚛️ React App</option>
+            </select>
+            <div style="display:flex; gap:1rem; margin-top:1.5rem">
+                <button class="btn-primary" onclick="createServer()">🚀 Create</button>
+                <button class="btn-danger" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let currentServer = null;
+        let statsInterval = null;
+
+        async function init() {
+            await checkAuth();
+            await loadUserStats();
+            await loadServers();
+            await loadSubdomains();
+            await loadApiKeys();
+            await loadActivity();
+        }
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/current_user');
+                const data = await res.json();
+                if (!data.success) {
+                    window.location.href = '/login';
+                    return;
+                }
+                currentUser = data;
+                document.getElementById('username').textContent = data.username;
+                document.getElementById('userAvatar').textContent = data.username.charAt(0).toUpperCase();
+            } catch(e) {
+                window.location.href = '/login';
+            }
+        }
+
+        async function loadUserStats() {
+            const res = await fetch('/api/user/stats');
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('storageBadge').innerHTML = `📦 ${data.storage_used} MB / ${data.storage_quota} MB`;
+                document.getElementById('storageUsed').innerHTML = `${data.storage_used} MB / ${data.storage_quota} MB`;
+                document.getElementById('apiKeysCount').textContent = data.api_keys_count;
+                document.getElementById('subdomainsCount').textContent = data.subdomains_count;
+                document.getElementById('referralCode').textContent = data.referral_code || '-';
+                document.getElementById('referralLink').innerHTML = `${window.location.origin}/register?ref=${data.referral_code}`;
+            }
+        }
+
+        async function loadServers() {
+            const res = await fetch('/api/servers/list');
+            const data = await res.json();
+            const container = document.getElementById('serversList');
+            
+            if (!data.servers || data.servers.length === 0) {
+                container.innerHTML = '<div class="stat-card" style="text-align:center">📭 No servers yet. Click "New Server" to start!</div>';
+                return;
+            }
+            
+            let running = 0;
+            container.innerHTML = data.servers.map(s => {
+                if (s.status === 'running') running++;
+                return `
+                    <div class="server-card" onclick="openServer('${s.id}')">
+                        <div class="server-name">
+                            🖥️ ${s.name}
+                            <span class="status status-${s.status}">${s.status === 'running' ? '🟢 Running' : '🔴 Stopped'}</span>
+                        </div>
+                        <div class="server-details">
+                            <span>📅 ${new Date(s.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('totalServers').textContent = data.servers.length;
+            document.getElementById('runningServers').textContent = running;
+        }
+
+        async function loadSubdomains() {
+            const res = await fetch('/api/subdomain/list');
+            const data = await res.json();
+            const container = document.getElementById('subdomainsList');
+            
+            // Update server select
+            const serverRes = await fetch('/api/servers/list');
+            const serverData = await serverRes.json();
+            const select = document.getElementById('subdomainServer');
+            select.innerHTML = '<option value="">No server</option>';
+            if (serverData.servers) {
+                serverData.servers.forEach(s => {
+                    select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+                });
+            }
+            
+            if (!data.subdomains || data.subdomains.length === 0) {
+                container.innerHTML = '<div class="stat-card" style="text-align:center">🌐 No subdomains yet</div>';
+                return;
+            }
+            
+            container.innerHTML = data.subdomains.map(s => `
+                <div class="stat-card">
+                    <div style="font-size:1.5rem">🌐</div>
+                    <div style="font-weight:bold; color:var(--primary)">${s.full_domain}</div>
+                    <div style="font-size:0.8rem">Server: ${s.server_name}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted)">${new Date(s.created_at).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadApiKeys() {
+            const res = await fetch('/api/apikeys/list');
+            const data = await res.json();
+            const container = document.getElementById('apiKeysList');
+            
+            if (!data.api_keys || data.api_keys.length === 0) {
+                container.innerHTML = '<div class="stat-card" style="text-align:center">🔑 No API keys yet</div>';
+                return;
+            }
+            
+            container.innerHTML = data.api_keys.map(k => `
+                <div class="stat-card">
+                    <div><strong>🔑 ${k.name}</strong></div>
+                    <div style="font-size:0.75rem; font-family:monospace">${k.key_preview}</div>
+                    <div style="font-size:0.7rem">Created: ${new Date(k.created_at).toLocaleDateString()}</div>
+                    <button class="btn-danger" style="margin-top:0.8rem" onclick="revokeKey(${k.id})">Revoke</button>
+                </div>
+            `).join('');
+        }
+
+        async function loadActivity() {
+            const res = await fetch('/api/activity/logs?limit=20');
+            const data = await res.json();
+            const container = document.getElementById('activityList');
+            
+            if (!data.logs || data.logs.length === 0) {
+                container.innerHTML = '<div class="stat-card" style="text-align:center">📋 No activity yet</div>';
+                return;
+            }
+            
+            container.innerHTML = data.logs.map(log => `
+                <div class="stat-card">
+                    <div><strong style="color:var(--primary)">${log.action}</strong></div>
+                    <div style="font-size:0.8rem">${log.details || ''}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted)">${new Date(log.timestamp).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        async function createSubdomain() {
+            const subdomain = document.getElementById('newSubdomain').value.trim();
+            const serverId = document.getElementById('subdomainServer').value;
+            
+            if (!subdomain) {
+                showToast('Enter subdomain name', 'error');
+                return;
+            }
+            
+            const res = await fetch('/api/subdomain/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subdomain, server_folder: serverId })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast(`✅ Created: ${data.domain}`, 'success');
+                document.getElementById('newSubdomain').value = '';
+                loadSubdomains();
+                loadUserStats();
+            } else {
+                showToast(data.message, 'error');
+            }
+        }
+
+        async function generateApiKey() {
+            const name = document.getElementById('apiKeyName').value.trim();
+            if (!name) {
+                showToast('Enter key name', 'error');
+                return;
+            }
+            
+            const res = await fetch('/api/apikeys/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                alert(`🔑 Your API Key:\n\n${data.api_key}\n\nSave this securely! You won't see it again.`);
+                document.getElementById('apiKeyName').value = '';
+                loadApiKeys();
+                loadUserStats();
+            } else {
+                showToast(data.message, 'error');
+            }
+        }
+
+        async function revokeKey(keyId) {
+            if (confirm('Revoke this API key? This action cannot be undone.')) {
+                const res = await fetch('/api/apikeys/revoke', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key_id: keyId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Key revoked', 'success');
+                    loadApiKeys();
+                    loadUserStats();
+                }
+            }
+        }
+
+        async function updateSettings() {
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (password && password !== confirm) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            const res = await fetch('/api/user/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast('Settings updated!', 'success');
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                loadUserStats();
+            } else {
+                showToast(data.message, 'error');
+            }
+        }
+
+        function openServer(folder) {
+            window.location.href = `/server/${folder}`;
+        }
+
+        function showCreateServerModal() {
+            document.getElementById('createModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('createModal').style.display = 'none';
+            document.getElementById('serverName').value = '';
+        }
+
+        async function createServer() {
+            const name = document.getElementById('serverName').value.trim();
+            const template = document.getElementById('serverTemplate').value;
+            
+            if (!name) {
+                showToast('Enter server name', 'error');
+                return;
+            }
+            
+            const res = await fetch('/api/server/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, template })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast('Server created!', 'success');
+                closeModal();
+                loadServers();
+                loadUserStats();
+            } else {
+                showToast(data.message, 'error');
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('serversTab').style.display = tab === 'servers' ? 'block' : 'none';
+            document.getElementById('subdomainsTab').style.display = tab === 'subdomains' ? 'block' : 'none';
+            document.getElementById('apikeysTab').style.display = tab === 'apikeys' ? 'block' : 'none';
+            document.getElementById('activityTab').style.display = tab === 'activity' ? 'block' : 'none';
+            document.getElementById('referralsTab').style.display = tab === 'referrals' ? 'block' : 'none';
+            document.getElementById('settingsTab').style.display = tab === 'settings' ? 'block' : 'none';
+            
+            if (tab === 'subdomains') loadSubdomains();
+            if (tab === 'apikeys') loadApiKeys();
+            if (tab === 'activity') loadActivity();
+        }
+
+        function copyReferralLink() {
+            const link = document.getElementById('referralLink').textContent;
+            navigator.clipboard.writeText(link);
+            showToast('Referral link copied!', 'success');
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeftColor = type === 'success' ? 'var(--success)' : 'var(--danger)';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
