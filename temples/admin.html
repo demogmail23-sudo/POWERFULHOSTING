@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - ZAINU HOST PRO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 1.5rem;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 1.5rem;
+        }
+
+        /* Top Bar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 1.2rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-success {
+            background: var(--success);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">👑 ZAINU ADMIN</div>
+        <ul class="sidebar-menu">
+            <li><a href="#" onclick="switchSection('dashboard')" class="active">📊 Dashboard</a></li>
+            <li><a href="#" onclick="switchSection('users')">👥 Users</a></li>
+            <li><a href="#" onclick="switchSection('servers')">🖥️ Servers</a></li>
+            <li><a href="#" onclick="switchSection('logs')">📋 Activity Logs</a></li>
+            <li><a href="#" onclick="switchSection('backups')">💾 Backups</a></li>
+            <li><a href="#" onclick="switchSection('settings')">⚙️ Settings</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h2>Admin Panel</h2>
+                <span class="admin-badge">⭐ SUPER ADMIN</span>
+            </div>
+            <div>
+                <span id="adminName">Admin</span>
+                <button onclick="logout()" style="margin-left:1rem; background:transparent; border:1px solid var(--danger); color:var(--danger); padding:0.3rem 0.8rem; border-radius:8px; cursor:pointer">Logout</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="totalUsers">0</div><div>Total Users</div></div>
+                <div class="stat-card"><div class="stat-value" id="totalServers">0</div><div>Total Servers</div></div>
+                <div class="stat-card"><div class="stat-value" id="totalStorage">0 GB</div><div>Storage Used</div></div>
+                <div class="stat-card"><div class="stat-value" id="activeToday">0</div><div>Active Today</div></div>
+            </div>
+
+            <div class="stat-card" style="margin-top:1rem">
+                <h3>📈 Recent Activity</h3>
+                <div id="recentActivity" style="margin-top:1rem"></div>
+                <button class="btn-success" onclick="loadDashboard()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="usersSection" style="display:none">
+            <div class="stat-card">
+                <h3>➕ Create New User</h3>
+                <div style="display:flex; gap:0.5rem; margin-top:1rem; flex-wrap:wrap">
+                    <input type="text" id="newUsername" placeholder="Username" style="padding:0.5rem; border-radius:8px; background:var(--darker); border:1px solid var(--primary); color:white">
+                    <input type="email" id="newEmail" placeholder="Email" style="padding:0.5rem; border-radius:8px; background:var(--darker); border:1px solid var(--primary); color:white">
+                    <input type="password" id="newPassword" placeholder="Password" style="padding:0.5rem; border-radius:8px; background:var(--darker); border:1px solid var(--primary); color:white">
+                    <button class="btn-success" onclick="createUser()">Create User</button>
+                </div>
+            </div>
+
+            <div class="data-table" style="margin-top:1rem">
+                <table style="width:100%">
+                    <thead>
+                        <tr><th>Username</th><th>Email</th><th>Storage</th><th>Servers</th><th>Joined</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="usersList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Servers Section -->
+        <div id="serversSection" style="display:none">
+            <div class="data-table">
+                <table style="width:100%">
+                    <thead><tr><th>Server Name</th><th>Owner</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                    <tbody id="serversListAdmin"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div id="logsSection" style="display:none">
+            <div class="data-table">
+                <table style="width:100%">
+                    <thead><tr><th>User</th><th>Action</th><th>Details</th><th>IP</th><th>Time</th></tr></thead>
+                    <tbody id="logsList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Backups Section -->
+        <div id="backupsSection" style="display:none">
+            <div class="stat-card">
+                <button class="btn-success" onclick="createBackup()">🔄 Create Full Backup</button>
+                <div id="backupMessage" style="margin-top:1rem"></div>
+            </div>
+            <div class="data-table" style="margin-top:1rem">
+                <table><thead><tr><th>Backup Name</th><th>Size</th><th>Created By</th><th>Date</th></tr></thead>
+                <tbody id="backupsList"></tbody></table>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsSection" style="display:none">
+            <div class="stat-card">
+                <h3>System Settings</h3>
+                <div style="margin:1rem 0"><label>📢 Announcement</label><input type="text" id="announcement" style="width:100%; padding:0.5rem; background:var(--darker); border:1px solid var(--primary); border-radius:8px; color:white"></div>
+                <div style="margin:1rem 0"><label>🔧 Maintenance Mode</label><select id="maintenanceMode" style="padding:0.5rem; background:var(--darker); border:1px solid var(--primary); border-radius:8px; color:white"><option value="false">Off</option><option value="true">On</option></select></div>
+                <button class="btn-success" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAdmin = null;
+
+        async function init() {
+            await checkAuth();
+            await loadDashboard();
+            await loadUsers();
+            await loadLogs();
+            await loadBackups();
+            await loadSettings();
+        }
+
+        async function checkAuth() {
+            const res = await fetch('/api/current_user');
+            const data = await res.json();
+            if (!data.success || data.role !== 'admin') {
+                window.location.href = '/';
+                return;
+            }
+            currentAdmin = data;
+            document.getElementById('adminName').innerHTML = `👋 ${data.username}`;
+        }
+
+        async function loadDashboard() {
+            const res = await fetch('/api/admin/stats');
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('totalUsers').textContent = data.stats.total_users;
+                document.getElementById('totalServers').textContent = data.stats.total_servers;
+                document.getElementById('totalStorage').textContent = Math.round(data.stats.total_storage / 1024) + ' GB';
+                document.getElementById('activeToday').textContent = data.stats.active_today;
+            }
+
+            const logsRes = await fetch('/api/admin/activity-logs?limit=10');
+            const logsData = await logsRes.json();
+            const container = document.getElementById('recentActivity');
+            if (logsData.logs) {
+                container.innerHTML = logsData.logs.map(log => `
+                    <div style="padding:0.5rem; border-bottom:1px solid rgba(99,102,241,0.1)">
+                        <strong>${log.username}</strong> → ${log.action}<br>
+                        <small style="color:var(--text-muted)">${new Date(log.timestamp).toLocaleString()}</small>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/admin/users');
+            const data = await res.json();
+            const tbody = document.getElementById('usersList');
+            if (data.users) {
+                tbody.innerHTML = data.users.map(u => `
+                    <tr>
+                        <td>${u.username}</td>
+                        <td>${u.email}</td>
+                        <td>${u.storage_used} / ${u.storage_quota} MB</td>
+                        <td>${u.servers_count}</td>
+                        <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td><button class="btn-danger" onclick="deleteUser(${u.id})">Delete</button></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function loadLogs() {
+            const res = await fetch('/api/admin/activity-logs?limit=50');
+            const data = await res.json();
+            const tbody = document.getElementById('logsList');
+            if (data.logs) {
+                tbody.innerHTML = data.logs.map(log => `
+                    <tr>
+                        <td>${log.username}</td>
+                        <td>${log.action}</td>
+                        <td>${log.details || '-'}</td>
+                        <td>${log.ip || '-'}</td>
+                        <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function loadBackups() {
+            // Backups list from database
+            const tbody = document.getElementById('backupsList');
+            tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+        }
+
+        async function loadSettings() {
+            // Load settings
+        }
+
+        async function createUser() {
+            const username = document.getElementById('newUsername').value;
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPassword').value;
+            
+            if (!username || !password) {
+                alert('Username and password required');
+                return;
+            }
+            
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                alert('User created!');
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newEmail').value = '';
+                document.getElementById('newPassword').value = '';
+                loadUsers();
+                loadDashboard();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (confirm('Delete this user?')) {
+                const res = await fetch('/api/admin/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    loadUsers();
+                    loadDashboard();
+                }
+            }
+        }
+
+        async function createBackup() {
+            const res = await fetch('/api/admin/backup', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('backupMessage').innerHTML = `<span style="color:var(--success)">✅ Backup created: ${data.backup_name}</span>`;
+                loadBackups();
+            }
+        }
+
+        async function saveSettings() {
+            const announcement = document.getElementById('announcement').value;
+            const maintenance = document.getElementById('maintenanceMode').value === 'true';
+            alert('Settings saved');
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+            document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
+            document.getElementById('serversSection').style.display = section === 'servers' ? 'block' : 'none';
+            document.getElementById('logsSection').style.display = section === 'logs' ? 'block' : 'none';
+            document.getElementById('backupsSection').style.display = section === 'backups' ? 'block' : 'none';
+            document.getElementById('settingsSection').style.display = section === 'settings' ? 'block' : 'none';
+            
+            if (section === 'users') loadUsers();
+            if (section === 'logs') loadLogs();
+        }
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        init();
+    </script>
+</body>
+  </html>
