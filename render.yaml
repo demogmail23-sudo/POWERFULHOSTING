@@ -1,0 +1,94 @@
+# Render.com Blueprint Configuration
+# Yeh file Render ko batata hai ki kaise deploy karna hai
+
+services:
+  # Main Web Service
+  - type: web
+    name: zainu-host-pro
+    runtime: python
+    repo: https://github.com/YOUR_USERNAME/zainu-host-pro  # Apna GitHub repo dalo
+    plan: free  # Free plan use karo (ya starter, pro)
+    
+    # Build Command
+    buildCommand: |
+      pip install -r requirements.txt
+      python -c "from database import init_database; init_database()"
+      mkdir -p users_data backups uploads
+    
+    # Start Command
+    startCommand: gunicorn app:app --worker-class eventlet -w 1 --bind 0.0.0.0:$PORT
+    
+    # Environment Variables
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite:///zainu_pro.db
+      - key: ENABLE_WEBSOCKET
+        value: true
+    
+    # Health Check
+    healthCheckPath: /api/health
+    
+    # Auto Deploy
+    autoDeploy: true
+    
+    # Build Filters
+    buildFilter:
+      paths:
+        - app.py
+        - requirements.txt
+        - templates/**
+        - static/**
+        - admin.py
+        - api.py
+        - models.py
+        - websocket.py
+        - database.py
+        - auth.py
+        - config.py
+
+  # Optional: Background Worker for backups
+  - type: worker
+    name: zainu-backup-worker
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python backup_worker.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: BACKUP_INTERVAL
+        value: 360  # 6 hours
+
+  # Optional: Redis for caching (Free tier available)
+  - type: redis
+    name: zainu-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+
+# Global environment variables
+envVarGroups:
+  - name: app-settings
+    envVars:
+      - key: APP_NAME
+        value: ZAINU HOST PRO
+      - key: ADMIN_USERNAME
+        value: ZAINU121
+      - key: ADMIN_PASSWORD
+        value: 8057558009
+      - key: MAINTENANCE_MODE
+        value: false
+      - key: DEBUG_MODE
+        value: false
+
+# Preview environments for PRs
+previews:
+  enabled: true
+  plan: free
